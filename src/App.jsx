@@ -2,13 +2,15 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import { GameRender } from '../components/gamerender'
-import { LoadingScreen, PauseButton, PauseScreen, TitleScreen } from '../components/gameScreen'
+import { GameOverScreen, GuiContainer, LoadingScreen, PauseButton, PauseScreen, TitleScreen } from '../components/gameScreen'
 
 export let appContext = createContext(null)
 function App() {
-  const [count, setCount] = useState(0);
+  let devMode = useRef(false);
   let [gameState,setGameState] = useState('Play');
+  let loadingScreenRef = useRef(null);
   let pauseScreenRef = useRef(null);
+  let gameOverScreenRef = useRef(null);
   let upButtonFunc = useRef(null);
   let upButtonFuncEnd = useRef(null);
   let leftButtonFunc = useRef(null);
@@ -19,9 +21,21 @@ function App() {
   let scoreValueRef = useRef(null);
   let jumpspeedValueRef = useRef(null);
   let jumpx2ValueRef = useRef(null);
-  let testRef = useRef(null);
+  let pauseAnimationFunc = useRef(null);
+  let resumeAnimationFunc = useRef(null);
+  let guiRef = useRef(null);
+  let guiRef2 = useRef(null);
+  let guiRef3 = useRef(null);
+  let gui_jumpDesc= useRef(null);
 
-  let togglePauseScreen = ()=>{pauseScreenRef.current.style.display = pauseScreenRef.current.style.display == 'block'? 'none' : 'block' }
+  let togglePauseScreen = ()=>
+      {
+        pauseScreenRef.current.style.display = pauseScreenRef.current.style.display == 'block'? 'none' : 'block' ;
+
+        if(pauseScreenRef.current.style.display == 'block'){pauseAnimationFunc.current();}
+        else{resumeAnimationFunc.current();}
+        
+      }
 
   let restartGame = ()=>
      {
@@ -32,12 +46,14 @@ function App() {
     {
       setGameState('title');
     }
+    
+
   return (
     <>
         <appContext.Provider
           value={{upButtonFunc,upButtonFuncEnd,leftButtonFunc,leftButtonFuncEnd,rigthButtonFunc,rigthButtonFuncEnd,
                   coinValueRef,scoreValueRef,jumpspeedValueRef,jumpx2ValueRef,setGameState,pauseScreenRef,togglePauseScreen,restartGame,
-                  quitGame
+                  quitGame,pauseAnimationFunc,resumeAnimationFunc,loadingScreenRef,gameOverScreenRef,guiRef,gui_jumpDesc,guiRef2,guiRef3,devMode
           }}
         >
             <style>
@@ -50,7 +66,7 @@ function App() {
                 `}
             </style>
             <div
-                className={`absolute w-full max-w-[600px] h-[500px] bg-black`}
+                className={`absolute w-full max-w-[600px] md1:h-[100%] md1:max-h-[700px] h-[500px] bg-black`}
             >
                 {gameState == "Play" && <GamePlay />}
                 {gameState == 'title' && <TitleScreen />}
@@ -98,6 +114,9 @@ function GamePlay()
                 <GameValueContainer icon='coin' order={2} _ref={_appContext.coinValueRef} />
                 <GameValueContainer icon='speed' order={3} _ref={_appContext.jumpspeedValueRef} />
                 <GameValueContainer icon='jumpx2' order={4} _ref={_appContext.jumpx2ValueRef} />
+                <LoadingScreen />
+                <GameOverScreen />
+                {_appContext.devMode.current && <GuiContainer  />}
          </>
 }
 

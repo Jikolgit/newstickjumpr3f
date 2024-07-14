@@ -3,26 +3,36 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { createMapPlane, generateMapObject } from "./mapTemplate";
 import gsap from "gsap";
 import React, { useContext, useEffect, useRef } from "react";
-import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
+import { OrbitControls, PerspectiveCamera, Text } from "@react-three/drei";
 import { appContext } from '../src/App';
+import * as dat from 'dat.gui';
+
+
 
 export function GameRender()
 {
+ 
     let _appContext = useContext(appContext);
     let level = 1;
+    let playertStep = 0;
     let scoreValue = 0;
-    let jumpSpeed = 1;
     let playerPreviousMove = 'none'
     let jumpSpeedBoostActived = false;
     let jumpSpeedCounter = 0;
-    
+    let playerMoveTimeline = null;
+    let previousPlatform;
+    let actualPlatform; 
+
+    let jumpSpeed = 0.5;
     let jumpDistanceX = 1;
     let jumpDistanceY = 2;
+    let jumpDesc = useRef({jumpSpeed:1,jumpDistanceX:1,jumpDistanceY:2});
+    _appContext.gui_jumpDesc.current =jumpDesc.current;
+    // console.log(_appContext.gui_jumpDesc)
     let jumpDistanceBosstActived = false
     let jumpDistanceBoostCounter = 0;
     let platformLength = 100
     let platformMid = platformLength*0.5;
-    const {scene} = useThree();
     let modelContainer = [];
     let coinmodelContainer = [];
     let coinmodelInfo = [];
@@ -30,9 +40,13 @@ export function GameRender()
     let jumpmodelInfo = [];
     let jumpSpeedmodelContainer = [];
     let jumpSpeedmodelInfo = [];
+    let jumpBigmodelContainer = [];
+    let jumpBigmodelInfo = [];
     
-    let initialmMapPlane = createMapPlane(1,'START','none');
+    
     let mapPlane = createMapPlane(1,'START','none');
+    let initialmMapPlane = structuredClone(mapPlane);
+    let platformCounter = useRef(null);
     let platformGroup1Ref = useRef(null);
     let platformGroup2Ref = useRef(null);
     let platformOrder = [platformGroup1Ref,platformGroup2Ref];
@@ -42,7 +56,8 @@ export function GameRender()
     let coinObjectRef = useRef([]);
     let jumpObjectRef = useRef([]);
     let jumpSpeedObjectRef = useRef([]);
-    let notUedObjectDesc = generateMapObject();
+    let jumpBigObjectRef = useRef([]);
+    // let notUedObjectDesc = generateMapObject();
     let notUedObject=[] ;
     let eachGroupPlatformInfo = [{hasReachCenter:false,executeOnce:false},{hasReachCenter:false,executeOnce:false}]
     let platformRef = useRef([]);
@@ -121,6 +136,19 @@ export function GameRender()
         jumpSpeedmodelInfo[i] ={isUsed:false,index:i,currentLevel:1};
 
     }
+    for(let i =0;i<20;i++)
+    {
+        jumpBigmodelContainer[i] = <group key={i}>
+                                        <mesh matrixAutoUpdate = {false} visible={false} position={[mapPlane[i].posX,1,mapPlane[i].posZ]}
+                                            ref={(val)=>{jumpBigObjectRef.current[i] = val}} 
+                                        >
+                                                <circleGeometry args={[2,10,10]} />
+                                                <meshBasicMaterial wireframe color={'white'}/>
+                                        </mesh>
+                                    </group>;
+        jumpBigmodelInfo[i] ={isUsed:false,index:i,currentLevel:1};
+
+    }
 
     let jumpAnimation = ()=>
         {
@@ -138,10 +166,67 @@ export function GameRender()
                 },
                 onComplete:()=>{
 
-                    stopAnimation('STAND')
-                    jumpAnimation()
+                    
+                    stopAnimation('STAND');
+                    jumpAnimation();
+                    if(playertStep>0)
+                    {
+                        startPlatformCounter();
+                    }
                 }
             })
+        }
+    let resumeAnimation = ()=>
+        {
+
+                if(playerStandAnimation)
+                {playerStandAnimation.resume()}            
+            
+
+                if(playerMoveAnimation)
+                {playerMoveAnimation.resume()}
+                
+            
+            
+                if(cameraMoveAnimation)
+                {cameraMoveAnimation.resume()}
+                
+            
+            
+                if(orbitMoveAnimation)
+                {orbitMoveAnimation.resume()}
+
+                if(playerMoveTimeline)
+                {playerMoveTimeline.resume()}
+                
+            
+
+        }
+    let pauseAnimation = ()=>
+        {
+
+                if(playerStandAnimation)
+                {playerStandAnimation.pause()}            
+            
+
+                if(playerMoveAnimation)
+                {playerMoveAnimation.pause()}
+                
+            
+            
+                if(cameraMoveAnimation)
+                {cameraMoveAnimation.pause()}
+                
+            
+            
+                if(orbitMoveAnimation)
+                {orbitMoveAnimation.pause()}
+
+                if(playerMoveTimeline)
+                {playerMoveTimeline.pause()}
+                
+            
+
         }
     let stopAnimation = (_animation)=>
         {
@@ -153,26 +238,28 @@ export function GameRender()
             }
             else if(_animation == 'PLAYER-MOVE')
             {
-                if(playerMoveAnimation)
-                playerMoveAnimation.kill();
-                playerMoveAnimation = null;
+                if(playerMoveTimeline)
+                {
+                    playerMoveTimeline.kill();
+                    playerMoveTimeline = null;
+                }
             }
-            else if(_animation == 'CAMERA-MOVE')
-            {
-                if(cameraMoveAnimation)
-                cameraMoveAnimation.kill();
-                cameraMoveAnimation = null;
-            }
-            else if(_animation == 'ORBIT-MOVE')
-            {
-                if(orbitMoveAnimation)
-                orbitMoveAnimation.kill();
-                orbitMoveAnimation = null;
-            }
+
 
         }
     let move = (direction,duration,distance)=>
         {
+                previousPlatform = actualPlatform;
+                playerMoveTimeline = gsap.timeline({onComplete:()=>
+                    {   
+                      
+                        jumpIsOver = true;
+                        playerRef.current.position.y = 1.5;
+                        stopAnimation('PLAYER-MOVE');
+                        jumpAnimation();
+                        getPlatformInfo(playerPosition)
+                    }});
+                
                 playerRef.current.position.y = 1.5;
                 jumpIsOver = false;
                 playerPreviousMove = direction;
@@ -190,14 +277,13 @@ export function GameRender()
                     orbitPosition.z += 8*distance;
     
                 }
-
                 if(direction == 'LEFT'){playerPosition.x += 8;}
                 if(direction == 'RIGHT'){playerPosition.x -= 8;}
                 
 
                 if(direction == 'RIGHT' || direction == 'LEFT')
                 {
-                    playerMoveAnimation =   gsap.to(playerRef.current.position,{
+                    playerMoveTimeline.to(playerRef.current.position,{
                         x:playerPosition.x,
                         z:playerPosition.z,
                         ease: "circ.out",
@@ -210,13 +296,13 @@ export function GameRender()
                             
                         },
                         onComplete:()=>{
-                            stopAnimation('PLAYER-MOVE');
+                           
                         }
-                        });
+                        },0);
                 }
                 else
                 {
-                    playerMoveAnimation =   gsap.to(playerRef.current.position,{
+                    playerMoveTimeline.to(playerRef.current.position,{
                         z:playerPosition.z,
                         ease: "circ.out",
                         duration:duration,
@@ -228,12 +314,12 @@ export function GameRender()
                             
                         },
                         onComplete:()=>{
-                            stopAnimation('PLAYER-MOVE');
+                           
                         }
-                        });
+                        },0);
                 }
                 
-                playerStandAnimation = gsap.to(playerRef.current.position,{
+                playerMoveTimeline.to(playerRef.current.position,{
                     y:10,
                     duration:duration*0.5,
                     repeat:1,
@@ -245,29 +331,29 @@ export function GameRender()
                         
                     },
                     onComplete:()=>{
-                        jumpIsOver = true;
-                        playerRef.current.position.y = 1.5;
-                        stopAnimation('STAND');
-                        jumpAnimation();
-                        getPlatformInfo(playerPosition)
+                        // jumpIsOver = true;
+                        // playerRef.current.position.y = 1.5;
+                        // stopAnimation('STAND');
+                        // jumpAnimation();
+                        // getPlatformInfo(playerPosition)
                     }
-                })
-                cameraMoveAnimation =   gsap.to(cameraRef.current.position,{
+                },0)
+                playerMoveTimeline.to(cameraRef.current.position,{
                 z:cameraPosition.z,
                 ease: "circ.out",
                 duration:duration,
                 onStart:()=>{
-                    
                 },
                 onUpdate: ()=>{
                     
                     
                 },
                 onComplete:()=>{
-                    stopAnimation('CAMERA-MOVE');
+                    
+                    // stopAnimation('CAMERA-MOVE');
                 }
-                })
-                cameraMoveAnimation =   gsap.to(orbitRef.current.target,{
+                },0)
+                playerMoveTimeline.to(orbitRef.current.target,{
                 z:orbitPosition.z,
                 ease: "circ.out",
                 duration:duration,
@@ -279,9 +365,9 @@ export function GameRender()
                     
                 },
                 onComplete:()=>{
-                    stopAnimation('ORBIT-MOVE');
+                    // stopAnimation('ORBIT-MOVE');
                 }
-                })
+                },0)
 
         }
     let checkIfCanAddNewPlatforme = (platform)=>
@@ -320,6 +406,11 @@ export function GameRender()
                 }
             }
         }
+    let setGameOver = ()=>
+        {   console.log('GAME OVER OVER')
+            pauseForGameOver();
+            _appContext.gameOverScreenRef.current.style.display = 'block';
+        }
     let resetNextPlatform = ()=>
         {
             // On netoie la platform
@@ -329,6 +420,16 @@ export function GameRender()
                     platformOrder[level-2].current.children[i].position.x = initialmMapPlane[i].posX;
                 }
             
+        }
+    let startPlatformCounter = ()=>
+        {
+            platformCounter.current.visible = true;
+            platformCounter.current.text --;
+            if(platformCounter.current.text == 0)
+            {
+                
+                setGameOver();
+            }
         }
     let getPlatformInfo = (_playerPosition)=>
         {
@@ -342,9 +443,28 @@ export function GameRender()
             {   
                 if(result.active)
                 {
-                    // console.log(playerPreviousMove);
+                   
+                    actualPlatform = result;
+                    platformCounter.current.position.x = result.posX;
+                    platformCounter.current.position.z = result.posZ;
+                    platformCounter.current.text = result.counter;
+
+                    playertStep++;
                     scoreValue++;
                     _appContext.scoreValueRef.current.innerText  = scoreValue;
+                    if(previousPlatform?.desc.objectType && previousPlatform.desc.objectType == 'Bigjump')
+                    {
+                        jumpDesc.current.jumpDistanceY = 2;
+                        if(jumpSpeedBoostActived)
+                        {
+                            jumpDesc.current.jumpSpeed = 0.5;
+                        }
+                        else
+                        {
+                            jumpDesc.current.jumpSpeed = 1;
+                        }
+                        
+                    }
                     if(playerPreviousMove == 'LEFT' || playerPreviousMove == 'RIGHT')
                     {
                         if(jumpDistanceBosstActived)
@@ -353,7 +473,7 @@ export function GameRender()
                             if(jumpDistanceBoostCounter == 0)
                             {
                                 jumpDistanceBosstActived = false;
-                                jumpDistanceX = 1
+                                jumpDesc.current.jumpDistanceX = 1
                             }
                             _appContext.jumpx2ValueRef.current.innerText  = jumpDistanceBoostCounter;
     
@@ -365,7 +485,7 @@ export function GameRender()
                         if(jumpSpeedCounter == 0)
                         {
                             jumpSpeedBoostActived = false;
-                            jumpSpeed = 1
+                            jumpDesc.current.jumpSpeed = 1
                         }
                         _appContext.jumpspeedValueRef.current.innerText  = jumpSpeedCounter;
 
@@ -374,45 +494,71 @@ export function GameRender()
                     checkPlatformEffect(result)
                     checkIfCanAddNewPlatforme(result)    
                 }
-                else{console.log("GAME OVER")}
+                else{setGameOver();}
             }
             else
             {
-                console.log('GAME OVER')
+                setGameOver();
+                
             }
             
            
         }
     let playerMovePressedEventHandlerCallB = (evt)=>
         {  
-
-            if(!keyIsPressed && jumpIsOver)
+            if(_appContext.gameOverScreenRef.current.style.display == 'block' || 
+                _appContext.loadingScreenRef.current.style.display == 'block' || 
+                _appContext.pauseScreenRef.current.style.display == 'block'
+            )
             {
-                keyIsPressed = true;
-                keyPressed = evt.key;
-                if(evt.key == 'ArrowLeft')
+                if(_appContext.pauseScreenRef.current.style.display == 'block')
                 {
-                    stopAnimation('STAND');
-                    move('LEFT',jumpSpeed,jumpDistanceX);
-                }
-                else if(evt.key == 'ArrowRight')
-                {
-                    stopAnimation('STAND');
-                    move('RIGHT',jumpSpeed,jumpDistanceX);
-    
-                }
-                else if(evt.key == 'ArrowUp')
-                {
-                    stopAnimation('STAND');
-                    move('TOP',jumpSpeed,jumpDistanceY);
-                }
-                else if(evt.key == ' ')
-                {   
-                    // console.log(platformOrder[level].current.children.length);
-                    
-                    // coinObjectRef.current[3].matrixAutoUpdate = !coinObjectRef.current[3].matrixAutoUpdate;
+                    if(evt.key == 'p')
+                    {
+                        _appContext.togglePauseScreen();                
+                    }
                 }
             }
+            else
+            {
+                if(evt.key == 'p')
+                {
+                    _appContext.togglePauseScreen();                   
+                }
+                else
+                {
+                    if(!keyIsPressed && jumpIsOver)
+                        {
+                            keyIsPressed = true;
+                            keyPressed = evt.key;
+                            if(evt.key == 'ArrowLeft')
+                            {
+                                stopAnimation('STAND');
+                                move('LEFT',jumpDesc.current.jumpSpeed,jumpDesc.current.jumpDistanceX);
+                            }
+                            else if(evt.key == 'ArrowRight')
+                            {
+                                stopAnimation('STAND');
+                                move('RIGHT',jumpDesc.current.jumpSpeed,jumpDesc.current.jumpDistanceX);
+                
+                            }
+                            else if(evt.key == 'ArrowUp')
+                            {
+                                stopAnimation('STAND');
+                                move('TOP',jumpDesc.current.jumpSpeed,jumpDesc.current.jumpDistanceY);
+                            }
+                           
+                            else if(evt.key == ' ')
+                            {   
+                                // console.log(platformOrder[level].current.children.length);
+                                
+                                // coinObjectRef.current[3].matrixAutoUpdate = !coinObjectRef.current[3].matrixAutoUpdate;
+                            }
+                        }
+                }
+
+            }
+
             
 
         }
@@ -438,6 +584,15 @@ export function GameRender()
                     console.log('take jump Speed Boost')
                     takeJumpSpeed(_platform)
                 }
+                else if(_platform.desc.objectType == 'Bigjump')
+                {   
+                    // jumpDesc.current.jumpDistanceY = _platform.desc.jumpSize
+                    // playerMovePressedEventHandlerCallB({key:'ArrowUp'})
+                    stopAnimation('STAND');
+                    jumpDesc.current.jumpDistanceY = _platform.desc.jumpSize
+                    jumpDesc.current.jumpSpeed = 2;
+                    move('TOP',jumpDesc.current.jumpSpeed,jumpDesc.current.jumpDistanceY);
+                }
             }
         }
     let takeCoin = (elem)=>
@@ -446,7 +601,7 @@ export function GameRender()
         }
     let takeJumpDistance = (elem)=>
         {
-            jumpDistanceX = 3;
+            jumpDesc.current.jumpDistanceX = 3;
             jumpDistanceBoostCounter += 15;
             jumpDistanceBosstActived = true;
             jumpObjectRef.current[elem.desc.objectToShowIndex].visible = false;
@@ -454,7 +609,7 @@ export function GameRender()
         }
     let takeJumpSpeed = (elem)=>
         {
-            jumpSpeed = 0.5;
+            jumpDesc.current.jumpSpeed = 0.5;
             jumpSpeedCounter += 20;
             jumpSpeedBoostActived = true;
             jumpSpeedObjectRef.current[elem.desc.objectToShowIndex].visible = false;
@@ -463,8 +618,7 @@ export function GameRender()
     let slidePlatform = (elem,platformInfo)=>
         {
             let slideAnimation;
-            let xTarget = mapPlane[platformInfo.desc.target].platformDirection == 'LEFT'? 2 : 10;
-            console.log(xTarget)
+            let xTarget = mapPlane[platformInfo.desc.targetInMap].platformDirection == 'LEFT'? 2 : 10;
             slideAnimation =   gsap.to(elem.position,{
                 x:xTarget,
                 ease: "none",
@@ -479,15 +633,15 @@ export function GameRender()
                 onComplete:()=>{
                     slideAnimation.kill();
                     slideAnimation = null;
-                    if(mapPlane[platformInfo.desc.target].platformDirection == 'RIGHT')
+                    if(mapPlane[platformInfo.desc.targetInMap].platformDirection == 'RIGHT')
                     {
-                        mapPlane[platformInfo.desc.target+1].active = true
-                        mapPlane[platformInfo.desc.target].active = false
+                        mapPlane[platformInfo.desc.targetInMap+1].active = true
+                        mapPlane[platformInfo.desc.targetInMap].active = false
                     }
                     else
                     {
-                        mapPlane[platformInfo.desc.target-1].active = true
-                        mapPlane[platformInfo.desc.target].active = false
+                        mapPlane[platformInfo.desc.targetInMap-1].active = true
+                        mapPlane[platformInfo.desc.targetInMap].active = false
 
                     }
                 }
@@ -504,18 +658,24 @@ export function GameRender()
 
     useFrame((clock)=>
         {
-            for(let i =0;i<coinObjectRef.current.length;i++)
+            if(_appContext.pauseScreenRef.current.style.display == 'block')
+            {}
+            else
             {
-                coinObjectRef.current[i].rotation.y += 0.1;
+                for(let i =0;i<coinObjectRef.current.length;i++)
+                {
+                    coinObjectRef.current[i].rotation.y += 0.1;
+                }
+                for(let i =0;i<jumpObjectRef.current.length;i++)
+                {
+                    jumpObjectRef.current[i].rotation.y += 0.025;
+                }
+                for(let i =0;i<jumpSpeedObjectRef.current.length;i++)
+                {
+                    jumpSpeedObjectRef.current[i].rotation.y += 0.025;
+                }
             }
-            for(let i =0;i<jumpObjectRef.current.length;i++)
-            {
-                jumpObjectRef.current[i].rotation.y += 0.025;
-            }
-            for(let i =0;i<jumpSpeedObjectRef.current.length;i++)
-            {
-                jumpSpeedObjectRef.current[i].rotation.y += 0.025;
-            }
+            
         })
     let searchForCoinToShow = (_index)=>
         {   
@@ -550,12 +710,12 @@ export function GameRender()
             
         }
     let searchForJumpSpeedToShow = (_index)=>
-        {
+        {   
             let findFreeJumpSpeedObject = (elem)=>
                 {
                     return elem.isUsed == false;
                 }  
-            let freeJumpSpeedObject = jumpmodelInfo.find(findFreeJumpSpeedObject);
+            let freeJumpSpeedObject = jumpSpeedmodelInfo.find(findFreeJumpSpeedObject);
             jumpSpeedObjectRef.current[freeJumpSpeedObject.index].visible = true;
             jumpSpeedObjectRef.current[freeJumpSpeedObject.index].matrixAutoUpdate = true;
             jumpSpeedObjectRef.current[freeJumpSpeedObject.index].position.x = mapPlane[_index].posX;
@@ -620,7 +780,7 @@ export function GameRender()
                 
                         }
                         else if(mapPlane[i].desc.objectType == 'jumpSpeed-BOOST')
-                        {
+                        {   
                             searchForJumpSpeedToShow(i)
                 
                         }
@@ -630,18 +790,40 @@ export function GameRender()
                                 platformOrder[level-1].current.children[mapPlane[i].desc.platformIndex].material.color = new THREE.Color(1,1,1);
                                     
                         }
+                        else if(mapPlane[i].desc.objectType == 'Bigjump')
+                        {   
+                            
+                                platformOrder[level-1].current.children[mapPlane[i].desc.platformIndex].material.wireframe = false;
+                                    
+                        }
                     }
                     objectIndex++;
                 }
                 
               
         }
+    let pauseForGameOver = ()=>
+        {
+            pauseAnimation();
+        }
+        
     useEffect(()=>
         {
+            if( _appContext.devMode.current)
+            {
+                _appContext.guiRef.current.innerText =jumpDesc.current.jumpSpeed;
+                _appContext.guiRef2.current.innerText =jumpDesc.current.jumpDistanceY;
+                _appContext.guiRef3.current.innerText =jumpDesc.current.jumpDistanceX;
+    
+            }
+
+            _appContext.loadingScreenRef.current.style.display = 'none'
             addObjectsToPlatform();
         })
     useEffect(()=>
         {  
+            _appContext.pauseAnimationFunc.current = ()=>{pauseAnimation()};
+            _appContext.resumeAnimationFunc.current = ()=>{resumeAnimation()};
             _appContext.leftButtonFunc.current = ()=>{playerMovePressedEventHandlerCallB({key:'ArrowLeft'})};
             _appContext.leftButtonFuncEnd.current = ()=>{playerMoveUpEventHandlerCallB({key:'ArrowLeft'})};
             _appContext.upButtonFunc.current = ()=>{playerMovePressedEventHandlerCallB({key:'ArrowUp'})};
@@ -667,6 +849,7 @@ export function GameRender()
                     
                 }
         },[])
+        console.log('generation')
     return <>
             <PerspectiveCamera ref={cameraRef} position={[cameraPosition.x,cameraPosition.y,cameraPosition.z]} makeDefault/>
             <OrbitControls ref={orbitRef} target={[orbitPosition.x,orbitPosition.y,orbitPosition.z]} />
@@ -693,6 +876,17 @@ export function GameRender()
             {coinmodelContainer}
             {jumpmodelContainer}
             {jumpSpeedmodelContainer}
-    
+            {/* {jumpBigmodelContainer} */}
+            <Text
+                            
+                ref={platformCounter}     
+                characters='1234567890'
+                visible={false}
+                fontSize={2.5} fontWeight={700}
+                rotation={[Math.PI*0.2,-(Math.PI),0]}
+                position={[mapPlane[0].posX,0.8,mapPlane[0].posZ-0.4]} color={'white'} anchorX={"center"} anchorY={"middle"}
+                >
+                {mapPlane[0].counter}
+            </Text>
             </>
 }

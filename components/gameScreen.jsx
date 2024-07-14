@@ -1,4 +1,4 @@
-import { useContext } from "react"
+import { useContext, useEffect, useRef } from "react"
 import { appContext } from "../src/App"
 
 export function TitleScreen()
@@ -75,6 +75,7 @@ export function PauseScreen(props)
                 ref={_appContext.pauseScreenRef}
                 className="hidden w-full h-full bg-black/80 absolute left-[0] top-[0] z-[3] ">
                         <div>PAUSE</div>
+                        <MenuButton func={()=>{_appContext.togglePauseScreen()}} img={'bouton_resume_new.png'} />
                         <MenuButton func={()=>{_appContext.restartGame()}} img={'bouton_restart_new.png'} />
                         <MenuButton func={()=>{_appContext.quitGame()}} img={'bouton_quit_new.png'} />
                 </div>
@@ -84,8 +85,70 @@ export function LoadingScreen(props)
 {
     let _appContext = useContext(appContext);
     return <div              
-                ref={_appContext.pauseScreenRef}
-                className="text-white text-[2rem] w-full h-full bg-black absolute z-[3] ">
+                ref={_appContext.loadingScreenRef}
+                className="text-white text-[2rem] w-full h-full bg-black absolute left-[0] top-[0] z-[10] ">
                         LOADING...
+                </div>
+}
+export function GameOverScreen(props)
+{
+    let _appContext = useContext(appContext);
+    return <div              
+                ref={_appContext.gameOverScreenRef}
+                className="hidden text-white text-[2rem] w-full h-full bg-black/80 absolute left-[0] top-[0] z-[9] ">
+                        <div>GAME OVER</div>
+                        <MenuButton func={()=>{_appContext.restartGame()}} img={'bouton_restart_new.png'} />
+                        <MenuButton func={()=>{_appContext.quitGame()}} img={'bouton_quit_new.png'} />
+
+                </div>
+}
+export function GuiContainer(props)
+{
+    let _appContext = useContext(appContext);
+    useEffect(()=>
+        {
+            // _ref.current.innerText = _appContext.gui_jumpDesc.current.jumpSpeed;
+            
+        },[])
+    return      <div              
+               
+                className=" opacity-70 w-[250px] p-[5px] text-white absolute z-[12] left-[0] top-[0] bg-blue-500/50 ">
+                        <div
+                            className="flex justify-between  "
+                        >
+                                <div>JumpSpeed</div>
+                                <div
+                                    ref={_appContext.guiRef} 
+                                ></div>
+                                <div>
+                                    <input onChange={(e)=>{_appContext.gui_jumpDesc.current.jumpSpeed =  _appContext.guiRef.current.innerText = e.target.value}} className="w-[30px] text-black " type="number" />
+                                </div>
+                                
+                        </div>
+                        <div
+                            className="flex justify-between mt-[20px]  "
+                        >
+                                <div>JumpDistance Y</div>
+                                <div
+                                    ref={_appContext.guiRef2} 
+                                ></div>
+                                <div>
+                                    <input onChange={(e)=>{_appContext.gui_jumpDesc.current.jumpDistanceY =  _appContext.guiRef2.current.innerText = e.target.value}} className="w-[30px] text-black " type="number" />
+                                </div>
+                                
+                        </div>
+                        <div
+                            className="flex justify-between mt-[20px]  "
+                        >
+                                <div>JumpDistance X</div>
+                                <div
+                                    ref={_appContext.guiRef3} 
+                                ></div>
+                                <div>
+                                    <input onChange={(e)=>{_appContext.gui_jumpDesc.current.jumpDistanceX =  _appContext.guiRef3.current.innerText = e.target.value}} className="w-[30px] text-black " type="number" />
+                                </div>
+                                
+                        </div>
+                        
                 </div>
 }

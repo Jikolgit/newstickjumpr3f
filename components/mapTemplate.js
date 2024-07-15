@@ -277,7 +277,7 @@ export function createMapPlane(level,type,lastPlatformPos)
                 {
                     getFreePlatform('jumpDistance-BOOST');
                 }
-                for(let i1 =0; i1 <45;i1++)
+                for(let i1 =0; i1 <14;i1++)
                 {
                     getFreePlatform('coin');
                 }

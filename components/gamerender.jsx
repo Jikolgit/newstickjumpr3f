@@ -70,7 +70,7 @@ export function GameRender()
     let jumpIsOver = true;
     let keyPressed = 'none';
     let playerPosition = {x:2,y:0,z:2};
-    let cameraPosition = {x:5.5,y:20,z:-15};
+    let cameraPosition = {x:5.5,y:35,z:-25};
     let orbitPosition = {x:5.5,y:0,z:20};
     let playerStandAnimation,playerMoveAnimation,playerJumpMoveAnimation,cameraMoveAnimation,orbitMoveAnimation;
 
@@ -966,7 +966,7 @@ export function GameRender()
     return <>
             <PerspectiveCamera ref={cameraRef} position={[cameraPosition.x,cameraPosition.y,cameraPosition.z]} makeDefault/>
             <OrbitControls 
-            // enablePan={false} enableRotate={false} enableZoom={false} 
+            enablePan={false} enableRotate={false} enableZoom={false} 
             ref={orbitRef} target={[orbitPosition.x,orbitPosition.y,orbitPosition.z]} />
             <group>
                 {/* <mesh ref={playerRef} position={[2,1.5,2]} >
@@ -1001,7 +1001,7 @@ export function GameRender()
                 visible={false}
                 fontSize={2.5} fontWeight={700}
                 rotation={[Math.PI*0.2,-(Math.PI),0]}
-                position={[mapPlane[0].posX,0.8,mapPlane[0].posZ-0.4]} color={'white'} anchorX={"center"} anchorY={"middle"}
+                position={[mapPlane[0].posX,1.2,mapPlane[0].posZ-0.4]} color={'white'} anchorX={"center"} anchorY={"middle"}
                 >
                 {mapPlane[0].counter}
             </Text>

@@ -70,7 +70,7 @@ export function JumpSpeedModel(props)
 
     let platformTxt = new THREE.MeshBasicMaterial({map:platformTexture})
     return  <>
-                <mesh scale={0.8} ref={props._ref} name="speedicon" geometry={nodes.speedicon.geometry} 
+                <mesh scale={0.5} ref={props._ref} name="speedicon" geometry={nodes.speedicon.geometry} 
                         visible={props._visible} matrixAutoUpdate={props._matrixAutoUpdate}
                     material={platformTxt} position={[props.position[0],props.position[1],props.position[2]]} />
 
@@ -90,7 +90,7 @@ export function JumpDistanceModel(props)
 
     let platformTxt = new THREE.MeshBasicMaterial({map:platformTexture})
     return  <>
-                <mesh scale={0.8} ref={props._ref} name="jumpx2icon" geometry={nodes.jumpx2icon.geometry} 
+                <mesh scale={0.5} ref={props._ref} name="jumpx2icon" geometry={nodes.jumpx2icon.geometry} 
                         visible={props._visible} matrixAutoUpdate={props._matrixAutoUpdate}
                     material={platformTxt} position={[props.position[0],props.position[1],props.position[2]]} />
 
@@ -112,7 +112,7 @@ export function CoinModel(props)
     return  <>
                 <mesh
                  rotation={[0,0,Math.PI*0.5]}
-                 scale={0.8} ref={props._ref} name="coin" geometry={nodes.coin.geometry} 
+                 scale={0.5} ref={props._ref} name="coin" geometry={nodes.coin.geometry} 
                         visible={props._visible} matrixAutoUpdate={props._matrixAutoUpdate}
                     material={platformTxt} position={[props.position[0],props.position[1],props.position[2]]} />
 

@@ -6,6 +6,7 @@ import React, { useContext, useEffect, useRef } from "react";
 import { OrbitControls, PerspectiveCamera, Text } from "@react-three/drei";
 import { appContext } from '../src/App';
 import * as dat from 'dat.gui';
+import { CoinModel, JumpBigModel, JumpDistanceModel, JumpSpeedModel, JumpSwitchModel, PlatformModel, PlayerModel } from './GameModels';
 
 
 
@@ -15,6 +16,7 @@ export function GameRender()
     let _appContext = useContext(appContext);
     let level = 1;
     let playertStep = 0;
+    let playerCoinValue = 0;
     let scoreValue = 0;
     let playerPreviousMove = 'none'
     let jumpSpeedBoostActived = false;
@@ -42,6 +44,8 @@ export function GameRender()
     let jumpSpeedmodelInfo = [];
     let jumpBigmodelContainer = [];
     let jumpBigmodelInfo = [];
+    let jumpSwitchmodelContainer = [];
+    let jumpSwitchmodelInfo = [];
     
     
     let mapPlane = createMapPlane(1,'START','none');
@@ -57,6 +61,7 @@ export function GameRender()
     let jumpObjectRef = useRef([]);
     let jumpSpeedObjectRef = useRef([]);
     let jumpBigObjectRef = useRef([]);
+    let jumpSwitchObjectRef = useRef([]);
     // let notUedObjectDesc = generateMapObject();
     let notUedObject=[] ;
     let eachGroupPlatformInfo = [{hasReachCenter:false,executeOnce:false},{hasReachCenter:false,executeOnce:false}]
@@ -65,8 +70,8 @@ export function GameRender()
     let jumpIsOver = true;
     let keyPressed = 'none';
     let playerPosition = {x:2,y:0,z:2};
-    let cameraPosition = {x:4,y:20,z:-15};
-    let orbitPosition = {x:4,y:0,z:20};
+    let cameraPosition = {x:5.5,y:20,z:-15};
+    let orbitPosition = {x:5.5,y:0,z:20};
     let playerStandAnimation,playerMoveAnimation,playerJumpMoveAnimation,cameraMoveAnimation,orbitMoveAnimation;
 
     let testObj = new THREE.Mesh(new THREE.BoxGeometry(5,5,5),new THREE.MeshBasicMaterial({color:'red'}))
@@ -88,37 +93,46 @@ export function GameRender()
             col = 'white'
         }
         modelContainer[i] = 
-                                <mesh key={i}  
-                                //    matrixAutoUpdate = {mapPlane[i].active? true : false}
-                                   visible={mapPlane[i].active? true : false}
-                                   position={[mapPlane[i].posX,0,mapPlane[i].posZ]} rotation={[-Math.PI*0.5,0,0]} >
-                                    <planeGeometry args={[4,4]} />
-                                    <meshBasicMaterial wireframe color={"blue"} />
-                                </mesh>
+                                // <mesh key={i}  
+                                //    visible={mapPlane[i].active? true : false}
+                                //    position={[mapPlane[i].posX,0,mapPlane[i].posZ]} rotation={[-Math.PI*0.5,0,0]} >
+                                //     <planeGeometry args={[4,4]} />
+                                //     <meshBasicMaterial wireframe color={"blue"} />
+                                // </mesh>
+                                <PlatformModel key={i} _visible={mapPlane[i].active? true : false}   
+                                position={[mapPlane[i].posX,0,mapPlane[i].posZ]} rotation={[-Math.PI*0.5,0,0]}
+                                />
                                 
                             
     }
     for(let i =0;i<30;i++)
     {
         coinmodelContainer[i] = <group key={i}>
-                                    <mesh matrixAutoUpdate = {false} visible={false} position={[mapPlane[i].posX,1,mapPlane[i].posZ]}
+                                    {/* <mesh matrixAutoUpdate = {false} visible={false} position={[mapPlane[i].posX,1,mapPlane[i].posZ]}
                                         ref={(val)=>{coinObjectRef.current[i] = val}} 
                                     >
                                             <boxGeometry args={[1.5,1.5,1.5]} />
                                             <meshBasicMaterial color={'white'}/>
-                                    </mesh>
+                                    </mesh> */}
+                                    <CoinModel 
+                                    _matrixAutoUpdate = {false} _visible={false} _ref={(val)=>{coinObjectRef.current[i] = val}}  
+                                    position={[mapPlane[i].posX,2.8,mapPlane[i].posZ]} 
+                                    />
                                 </group>;
         coinmodelInfo[i] ={isUsed:false,index:i,currentLevel:1};
     }
     for(let i =0;i<20;i++)
     {
         jumpmodelContainer[i] = <group key={i}>
-                                        <mesh matrixAutoUpdate = {false} visible={false} position={[mapPlane[i].posX,1,mapPlane[i].posZ]}
+                                        {/* <mesh matrixAutoUpdate = {false} visible={false} position={[mapPlane[i].posX,1,mapPlane[i].posZ]}
                                             ref={(val)=>{jumpObjectRef.current[i] = val}} 
                                         >
                                                 <sphereGeometry args={[2,10,10]} />
                                                 <meshBasicMaterial wireframe color={'red'}/>
-                                        </mesh>
+                                        </mesh> */}
+                                        <JumpDistanceModel 
+                                        _matrixAutoUpdate = {false} _visible={false} _ref={(val)=>{jumpObjectRef.current[i] = val}}  position={[mapPlane[i].posX,1,mapPlane[i].posZ]} 
+                                        />
                                 </group>;
         jumpmodelInfo[i] ={isUsed:false,index:i,currentLevel:1};
 
@@ -126,12 +140,13 @@ export function GameRender()
     for(let i =0;i<20;i++)
     {
         jumpSpeedmodelContainer[i] = <group key={i}>
-                                        <mesh matrixAutoUpdate = {false} visible={false} position={[mapPlane[i].posX,1,mapPlane[i].posZ]}
+                                        {/* <mesh matrixAutoUpdate = {false} visible={false} position={[mapPlane[i].posX,1,mapPlane[i].posZ]}
                                             ref={(val)=>{jumpSpeedObjectRef.current[i] = val}} 
                                         >
                                                 <circleGeometry args={[2,10,10]} />
                                                 <meshBasicMaterial wireframe color={'red'}/>
-                                        </mesh>
+                                        </mesh> */}
+                                        <JumpSpeedModel _matrixAutoUpdate = {false} _visible={false} _ref={(val)=>{jumpSpeedObjectRef.current[i] = val}}  position={[mapPlane[i].posX,1,mapPlane[i].posZ]} />
                                     </group>;
         jumpSpeedmodelInfo[i] ={isUsed:false,index:i,currentLevel:1};
 
@@ -139,17 +154,25 @@ export function GameRender()
     for(let i =0;i<20;i++)
     {
         jumpBigmodelContainer[i] = <group key={i}>
-                                        <mesh matrixAutoUpdate = {false} visible={false} position={[mapPlane[i].posX,1,mapPlane[i].posZ]}
-                                            ref={(val)=>{jumpBigObjectRef.current[i] = val}} 
-                                        >
-                                                <circleGeometry args={[2,10,10]} />
-                                                <meshBasicMaterial wireframe color={'white'}/>
-                                        </mesh>
+                                        <JumpBigModel _matrixAutoUpdate = {false} _visible={false} 
+                                                     _col={'blue'}
+                                                      _ref={(val)=>{jumpBigObjectRef.current[i] = val}}  position={[mapPlane[i].posX,1,mapPlane[i].posZ]} 
+                                        />
                                     </group>;
         jumpBigmodelInfo[i] ={isUsed:false,index:i,currentLevel:1};
 
     }
+    for(let i =0;i<20;i++)
+    {
+        jumpSwitchmodelContainer[i] = <group key={i}>
+                                        <JumpSwitchModel _matrixAutoUpdate = {false} _visible={false} 
+                                                        _col={'white'}
+                                                        _ref={(val)=>{jumpSwitchObjectRef.current[i] = val}}  position={[mapPlane[i].posX,1,mapPlane[i].posZ]} 
+                                        />
+                                    </group>;
+        jumpSwitchmodelInfo[i] ={isUsed:false,index:i,currentLevel:1};
 
+    }
     let jumpAnimation = ()=>
         {
             playerStandAnimation = gsap.to(playerRef.current.position,{
@@ -416,7 +439,7 @@ export function GameRender()
             // On netoie la platform
             for(let i = 0;i<platformOrder[level-2].current.children.length;i++)
                 {   
-                    platformOrder[level-2].current.children[i].material.color = new THREE.Color(0,0,1);
+                    // platformOrder[level-2].current.children[i].material.color = new THREE.Color(0,0,1);
                     platformOrder[level-2].current.children[i].position.x = initialmMapPlane[i].posX;
                 }
             
@@ -597,7 +620,9 @@ export function GameRender()
         }
     let takeCoin = (elem)=>
         {
+            playerCoinValue ++;
             coinObjectRef.current[elem.desc.objectToShowIndex].visible = false;
+            _appContext.coinValueRef.current.innerText  = playerCoinValue;
         }
     let takeJumpDistance = (elem)=>
         {
@@ -605,7 +630,7 @@ export function GameRender()
             jumpDistanceBoostCounter += 15;
             jumpDistanceBosstActived = true;
             jumpObjectRef.current[elem.desc.objectToShowIndex].visible = false;
-            _appContext.jumpx2ValueRef.current.innerText  = jumpDistanceBoostCounter;
+            _appContext.coinValueRef.current.innerText  = jumpDistanceBoostCounter;
         }
     let takeJumpSpeed = (elem)=>
         {
@@ -658,13 +683,14 @@ export function GameRender()
 
     useFrame((clock)=>
         {
+            // console.log('o')
             if(_appContext.pauseScreenRef.current.style.display == 'block')
             {}
             else
             {
                 for(let i =0;i<coinObjectRef.current.length;i++)
                 {
-                    coinObjectRef.current[i].rotation.y += 0.1;
+                    coinObjectRef.current[i].rotation.y += 0.05;
                 }
                 for(let i =0;i<jumpObjectRef.current.length;i++)
                 {
@@ -673,6 +699,17 @@ export function GameRender()
                 for(let i =0;i<jumpSpeedObjectRef.current.length;i++)
                 {
                     jumpSpeedObjectRef.current[i].rotation.y += 0.025;
+                }
+                for(let i =0;i<jumpBigObjectRef.current.length;i++)
+                {
+                    // jumpBigObjectRef.current[i].rotation.y += 0.025;
+                    // jumpBigObjectRef.current[i].childern[0].material.uniforms.utime.value += 0.05;
+                    // jumpBigObjectRef.current[i].material.color = new THREE.Color(0,0,1);
+                    jumpBigObjectRef.current[i].children[0].material.uniforms.utime.value += 0.05;
+                }
+                for(let i =0;i<jumpSwitchObjectRef.current.length;i++)
+                {
+                    jumpSwitchObjectRef.current[i].children[0].material.uniforms.utime.value += 0.05;
                 }
             }
             
@@ -716,6 +753,7 @@ export function GameRender()
                     return elem.isUsed == false;
                 }  
             let freeJumpSpeedObject = jumpSpeedmodelInfo.find(findFreeJumpSpeedObject);
+            // console.log(jumpSpeedObjectRef.current)
             jumpSpeedObjectRef.current[freeJumpSpeedObject.index].visible = true;
             jumpSpeedObjectRef.current[freeJumpSpeedObject.index].matrixAutoUpdate = true;
             jumpSpeedObjectRef.current[freeJumpSpeedObject.index].position.x = mapPlane[_index].posX;
@@ -723,6 +761,40 @@ export function GameRender()
             jumpSpeedmodelInfo[freeJumpSpeedObject.index].isUsed = true;
             jumpSpeedmodelInfo[freeJumpSpeedObject.index].currentLevel = level;
             mapPlane[_index].desc.objectToShowIndex = freeJumpSpeedObject.index;
+
+        }
+    let searchForBigJumpToShow = (_index)=>
+        {   
+            let findFreeJumpBigObject = (elem)=>
+                {
+                    return elem.isUsed == false;
+                }  
+            let freeBigjumpObject = jumpBigmodelInfo.find(findFreeJumpBigObject);
+            
+            jumpBigObjectRef.current[freeBigjumpObject.index].visible = true;
+            jumpBigObjectRef.current[freeBigjumpObject.index].matrixAutoUpdate = true;
+            jumpBigObjectRef.current[freeBigjumpObject.index].position.x = mapPlane[_index].posX;
+            jumpBigObjectRef.current[freeBigjumpObject.index].position.z = mapPlane[_index].posZ;
+            jumpBigmodelInfo[freeBigjumpObject.index].isUsed = true;
+            jumpBigmodelInfo[freeBigjumpObject.index].currentLevel = level;
+            mapPlane[_index].desc.objectToShowIndex = freeBigjumpObject.index;
+
+        }
+    let searchForSwitchToShow = (_index)=>
+        {   
+            let findFreeJumpBigObject = (elem)=>
+                {
+                    return elem.isUsed == false;
+                }  
+            let freeBigjumpObject = jumpSwitchmodelInfo.find(findFreeJumpBigObject);
+            
+            jumpSwitchObjectRef.current[freeBigjumpObject.index].visible = true;
+            jumpSwitchObjectRef.current[freeBigjumpObject.index].matrixAutoUpdate = true;
+            jumpSwitchObjectRef.current[freeBigjumpObject.index].position.x = mapPlane[_index].posX;
+            jumpSwitchObjectRef.current[freeBigjumpObject.index].position.z = mapPlane[_index].posZ;
+            jumpSwitchmodelInfo[freeBigjumpObject.index].isUsed = true;
+            jumpSwitchmodelInfo[freeBigjumpObject.index].currentLevel = level;
+            mapPlane[_index].desc.objectToShowIndex = freeBigjumpObject.index;
 
         }
     let clearPreviousObject = ()=>
@@ -736,6 +808,42 @@ export function GameRender()
 
                     jumpObjectRef.current[jumpmodelInfo[i].index].visible = false;
                     jumpObjectRef.current[jumpmodelInfo[i].index].matrixAutoUpdate = false;
+                    
+                }
+            }
+            for(let i =0;i<jumpSpeedmodelInfo.length;i++)
+            {
+                if(jumpSpeedmodelInfo[i].isUsed && jumpSpeedmodelInfo[i].currentLevel == (level-1) )
+                {
+                    jumpSpeedmodelInfo[i].isUsed = false;
+                    jumpSpeedmodelInfo[i].currentLevel = 0;
+
+                    jumpSpeedObjectRef.current[jumpSpeedmodelInfo[i].index].visible = false;
+                    jumpSpeedObjectRef.current[jumpSpeedmodelInfo[i].index].matrixAutoUpdate = false;
+                    
+                }
+            }
+            for(let i =0;i<jumpBigmodelInfo.length;i++)
+            {
+                if(jumpBigmodelInfo[i].isUsed && jumpBigmodelInfo[i].currentLevel == (level-1) )
+                {
+                    jumpBigmodelInfo[i].isUsed = false;
+                    jumpBigmodelInfo[i].currentLevel = 0;
+
+                    jumpBigObjectRef.current[jumpBigmodelInfo[i].index].visible = false;
+                    jumpBigObjectRef.current[jumpBigmodelInfo[i].index].matrixAutoUpdate = false;
+                    
+                }
+            }
+            for(let i =0;i<jumpSwitchmodelInfo.length;i++)
+            {
+                if(jumpSwitchmodelInfo[i].isUsed && jumpSwitchmodelInfo[i].currentLevel == (level-1) )
+                {
+                    jumpSwitchmodelInfo[i].isUsed = false;
+                    jumpSwitchmodelInfo[i].currentLevel = 0;
+
+                    jumpSwitchObjectRef.current[jumpSwitchmodelInfo[i].index].visible = false;
+                    jumpSwitchObjectRef.current[jumpSwitchmodelInfo[i].index].matrixAutoUpdate = false;
                     
                 }
             }
@@ -787,13 +895,14 @@ export function GameRender()
                         else if(mapPlane[i].desc.objectType == 'switch')
                         {   
                             
-                                platformOrder[level-1].current.children[mapPlane[i].desc.platformIndex].material.color = new THREE.Color(1,1,1);
+                            searchForSwitchToShow(i)
+                                // platformOrder[level-1].current.children[mapPlane[i].desc.platformIndex].material.color = new THREE.Color(1,1,1);
                                     
                         }
                         else if(mapPlane[i].desc.objectType == 'Bigjump')
                         {   
-                            
-                                platformOrder[level-1].current.children[mapPlane[i].desc.platformIndex].material.wireframe = false;
+                            searchForBigJumpToShow(i)
+                                // platformOrder[level-1].current.children[mapPlane[i].desc.platformIndex].material.wireframe = false;
                                     
                         }
                     }
@@ -808,7 +917,7 @@ export function GameRender()
         }
         
     useEffect(()=>
-        {
+        {   
             if( _appContext.devMode.current)
             {
                 _appContext.guiRef.current.innerText =jumpDesc.current.jumpSpeed;
@@ -852,12 +961,15 @@ export function GameRender()
         console.log('generation')
     return <>
             <PerspectiveCamera ref={cameraRef} position={[cameraPosition.x,cameraPosition.y,cameraPosition.z]} makeDefault/>
-            <OrbitControls ref={orbitRef} target={[orbitPosition.x,orbitPosition.y,orbitPosition.z]} />
+            <OrbitControls 
+            // enablePan={false} enableRotate={false} enableZoom={false} 
+            ref={orbitRef} target={[orbitPosition.x,orbitPosition.y,orbitPosition.z]} />
             <group>
-                <mesh ref={playerRef} position={[2,1.5,2]} >
+                {/* <mesh ref={playerRef} position={[2,1.5,2]} >
                     <boxGeometry args={[0.5,3,1]} />
                     <meshBasicMaterial color={'red'} />
-                </mesh>
+                </mesh> */}
+                <PlayerModel _ref={playerRef} position={[2,1.5,2]} />
                 <group
                     
                     ref={platformGroup1Ref} 
@@ -876,7 +988,8 @@ export function GameRender()
             {coinmodelContainer}
             {jumpmodelContainer}
             {jumpSpeedmodelContainer}
-            {/* {jumpBigmodelContainer} */}
+            {jumpBigmodelContainer}
+            {jumpSwitchmodelContainer}
             <Text
                             
                 ref={platformCounter}     

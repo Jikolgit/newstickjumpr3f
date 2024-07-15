@@ -143,7 +143,7 @@ export function createMapPlane(level,type,lastPlatformPos)
                 {   //GENERE PLATFORMES DISPONIBLES
                     objectPosition = Math.floor(Math.random()*elem.length);
                     
-                    if(objectPosition > 4 && objectPosition < 70)
+                    if(objectPosition > 4 && objectPosition < 80)
                     {   
                         getFreePlatformActive(_objects);
                     }
@@ -158,7 +158,7 @@ export function createMapPlane(level,type,lastPlatformPos)
                 {   //GENERE PLATFORMES DISPONIBLES
                     objectPosition = Math.floor(Math.random()*elem.length);
                     
-                    if(objectPosition > 4 && objectPosition < 60)
+                    if(objectPosition > 4 && objectPosition < 80)
                     {   
                         
                         getFreePlatformActiveForPlatformEffect(_objects);
@@ -187,11 +187,17 @@ export function createMapPlane(level,type,lastPlatformPos)
                                 elem[objectPosition].hasObject = true;
                                 elem[objectPosition].desc.objectType = 'jumpDistance-BOOST';
                             }
-                            if(_objects == 'jumpSpeed-BOOST')
+                            else if(_objects == 'jumpSpeed-BOOST')
                             {   
                                 // console.log(objectPosition)
                                 elem[objectPosition].hasObject = true;
                                 elem[objectPosition].desc.objectType = 'jumpSpeed-BOOST';
+                            }
+                            else if(_objects == 'coin')
+                            {   
+                                // console.log(objectPosition)
+                                elem[objectPosition].hasObject = true;
+                                elem[objectPosition].desc.objectType = 'coin';
                             }
                             
                         }
@@ -259,27 +265,39 @@ export function createMapPlane(level,type,lastPlatformPos)
     
                     }
             
-                if(level > 2)
-                {
-                    for(let i1 =0; i1 <3;i1++)
-                        {
-                            getFreePlatform('jumpDistance-BOOST');
-                        }
-                }
+                // if(level > 2)
+                // {
+                //     for(let i1 =0; i1 <3;i1++)
+                //         {
+                //             getFreePlatform('jumpDistance-BOOST');
+                //         }
+                // }
+
                 for(let i1 =0; i1 <3;i1++)
                 {
-                    getFreePlatform('Bigjump');
+                    getFreePlatform('jumpDistance-BOOST');
+                }
+                for(let i1 =0; i1 <10;i1++)
+                {
+                    getFreePlatform('coin');
+                }
+                for(let i1 =0; i1 <1;i1++)
+                {
+                    getFreePlatformForPlatformEffect('Bigjump');
                 }
                 for(let i1 =0; i1 <3;i1++)
                 {
                     getFreePlatform('jumpSpeed-BOOST');
                 }
-                for(let i1 =0; i1 <2;i1++)
+                for(let i1 =0; i1 <3;i1++)
                 {
                     getFreePlatformForPlatformEffect('switch')
                 }
                 
-
+                // elem[3].hasObject = true;
+                // elem[3].desc.objectType = 'Bigjump';
+                // elem[3].desc.platformIndex = 3;
+                // elem[3].desc.jumpSize =12;
             
 
         }
@@ -303,7 +321,6 @@ export function generateMapObject(elem)
     
         return result;
 }
-
 //ALGO GENERER MAP
 //GENERER DABORD LA MAP
 //AJOUTER LES OBJETS RANDOM

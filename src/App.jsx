@@ -89,24 +89,44 @@ function GamePlay()
                 <div
                     id='CONTROL BUTTON'
                     className={`w-[250px] h-[50px] absolute z-[1] left-[0] right-[0] mx-auto bottom-[10px]
-                              flex justify-between `}
+                              flex justify-between  `}
                 >
 
                       <div
                         onTouchStart={()=>{_appContext.leftButtonFunc.current()}}
                         onTouchEnd={()=>{_appContext.leftButtonFuncEnd.current()}}
-                        className={`w-[50px] h-[50px] bg-red-500 `}
-                      ></div>
+                        className={` w-[50px] h-[50px]
+                                     
+                                     `}
+                      >
+                          <svg
+                              className='bg-gray-800 border-white border-[3px] rounded-full' 
+                          width={50} height={50} fill="none" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path d="m15 18-6-6 6-6" />
+                          </svg>
+                      </div>
                       <div
                         onTouchStart={()=>{_appContext.upButtonFunc.current()}}
                         onTouchEnd={()=>{_appContext.upButtonFuncEnd.current()}}
-                        className={`w-[50px] h-[50px] bg-red-500 `}
-                      ></div>
+                        className={`w-[50px] h-[50px] `}
+                      >
+                        <svg
+                        className='bg-gray-800 border-white border-[3px] rounded-full'  
+                        width={50} height={50} fill="none" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m18 15-6-6-6 6" />
+                        </svg>
+                      </div>
                       <div
                         onTouchStart={()=>{_appContext.rigthButtonFunc.current()}}
                         onTouchEnd={()=>{_appContext.rigthButtonFuncEnd.current()}}
-                        className={`w-[50px] h-[50px] bg-red-500 `}
-                      ></div>
+                        className={`w-[50px] h-[50px] `}
+                      >
+                        <svg
+                        className='bg-gray-800 border-white border-[3px] rounded-full'  
+                        width={50} height={50} fill="none" stroke="#ffffff" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m9 18 6-6-6-6" />
+                        </svg>
+                      </div>
                 </div>
                 <PauseScreen />
                 <PauseButton />

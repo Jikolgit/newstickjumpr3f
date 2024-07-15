@@ -430,7 +430,8 @@ export function GameRender()
             }
         }
     let setGameOver = ()=>
-        {   console.log('GAME OVER OVER')
+        {   
+            // console.log('GAME OVER OVER')
             pauseForGameOver();
             _appContext.gameOverScreenRef.current.style.display = 'block';
         }
@@ -477,18 +478,20 @@ export function GameRender()
                     _appContext.scoreValueRef.current.innerText  = scoreValue;
                     if(previousPlatform?.desc.objectType && previousPlatform.desc.objectType == 'Bigjump')
                     {
-                        jumpDesc.current.jumpDistanceY = 2;
+                        // jumpDesc.current.jumpDistanceY = 2;
                         if(jumpSpeedBoostActived)
                         {
                             jumpDesc.current.jumpSpeed = 0.5;
+                            jumpDesc.current.jumpDistanceY = 4;
                         }
                         else
                         {
                             jumpDesc.current.jumpSpeed = 1;
+                            jumpDesc.current.jumpDistanceY = 2;
                         }
                         
                     }
-                    if(playerPreviousMove == 'LEFT' || playerPreviousMove == 'RIGHT')
+                    if(playerPreviousMove == 'LEFT' || playerPreviousMove == 'RIGHT' || playerPreviousMove == 'TOP')
                     {
                         if(jumpDistanceBosstActived)
                         {
@@ -599,12 +602,12 @@ export function GameRender()
                 }
                 else if(_platform.desc.objectType == 'jumpDistance-BOOST')
                 {   
-                    console.log('take jump Distance Boost')
+                    // console.log('take jump Distance Boost')
                     takeJumpDistance(_platform)
                 }
                 else if(_platform.desc.objectType == 'jumpSpeed-BOOST')
                 {   
-                    console.log('take jump Speed Boost')
+                    // console.log('take jump Speed Boost')
                     takeJumpSpeed(_platform)
                 }
                 else if(_platform.desc.objectType == 'Bigjump')
@@ -627,7 +630,8 @@ export function GameRender()
     let takeJumpDistance = (elem)=>
         {
             jumpDesc.current.jumpDistanceX = 3;
-            jumpDistanceBoostCounter += 15;
+            jumpDesc.current.jumpDistanceY = 4;
+            jumpDistanceBoostCounter += 5;
             jumpDistanceBosstActived = true;
             jumpObjectRef.current[elem.desc.objectToShowIndex].visible = false;
             _appContext.coinValueRef.current.innerText  = jumpDistanceBoostCounter;
@@ -635,7 +639,7 @@ export function GameRender()
     let takeJumpSpeed = (elem)=>
         {
             jumpDesc.current.jumpSpeed = 0.5;
-            jumpSpeedCounter += 20;
+            jumpSpeedCounter += 10;
             jumpSpeedBoostActived = true;
             jumpSpeedObjectRef.current[elem.desc.objectToShowIndex].visible = false;
             _appContext.jumpspeedValueRef.current.innerText  = jumpSpeedCounter;
@@ -709,7 +713,7 @@ export function GameRender()
                 }
                 for(let i =0;i<jumpSwitchObjectRef.current.length;i++)
                 {
-                    jumpSwitchObjectRef.current[i].children[0].material.uniforms.utime.value += 0.05;
+                    // jumpSwitchObjectRef.current[i].children[0].material.uniforms.utime.value += 0.05;
                 }
             }
             

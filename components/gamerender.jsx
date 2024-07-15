@@ -962,7 +962,7 @@ export function GameRender()
                     
                 }
         },[])
-        console.log('generation')
+      
     return <>
             <PerspectiveCamera ref={cameraRef} position={[cameraPosition.x,cameraPosition.y,cameraPosition.z]} makeDefault/>
             <OrbitControls 

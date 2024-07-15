@@ -47,7 +47,7 @@ function App() {
       setGameState('title');
     }
     
-    console.log('rendu')
+  
   return (
     <>
         <appContext.Provider

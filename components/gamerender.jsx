@@ -687,35 +687,39 @@ export function GameRender()
 
     useFrame((clock)=>
         {
-            // console.log('o')
-            if(_appContext.pauseScreenRef.current.style.display == 'block')
-            {}
-            else
-            {
-                for(let i =0;i<coinObjectRef.current.length;i++)
+
+            // if(_appContext.pauseScreenRef.current.style.display == 'block')
+            // {}
+            // else
+            // {
+                if(!_appContext.gamePause.current)
                 {
-                    coinObjectRef.current[i].rotation.y += 0.05;
+                        for(let i =0;i<coinObjectRef.current.length;i++)
+                        {
+                            coinObjectRef.current[i].rotation.y += 0.05;
+                        }
+                        for(let i =0;i<jumpObjectRef.current.length;i++)
+                        {
+                            jumpObjectRef.current[i].rotation.y += 0.025;
+                        }
+                        for(let i =0;i<jumpSpeedObjectRef.current.length;i++)
+                        {
+                            jumpSpeedObjectRef.current[i].rotation.y += 0.025;
+                        }
+                        for(let i =0;i<jumpBigObjectRef.current.length;i++)
+                        {
+                            // jumpBigObjectRef.current[i].rotation.y += 0.025;
+                            // jumpBigObjectRef.current[i].childern[0].material.uniforms.utime.value += 0.05;
+                            // jumpBigObjectRef.current[i].material.color = new THREE.Color(0,0,1);
+                            jumpBigObjectRef.current[i].children[0].material.uniforms.utime.value += 0.05;
+                        }
+                        for(let i =0;i<jumpSwitchObjectRef.current.length;i++)
+                        {
+                            // jumpSwitchObjectRef.current[i].children[0].material.uniforms.utime.value += 0.05;
+                        }
                 }
-                for(let i =0;i<jumpObjectRef.current.length;i++)
-                {
-                    jumpObjectRef.current[i].rotation.y += 0.025;
-                }
-                for(let i =0;i<jumpSpeedObjectRef.current.length;i++)
-                {
-                    jumpSpeedObjectRef.current[i].rotation.y += 0.025;
-                }
-                for(let i =0;i<jumpBigObjectRef.current.length;i++)
-                {
-                    // jumpBigObjectRef.current[i].rotation.y += 0.025;
-                    // jumpBigObjectRef.current[i].childern[0].material.uniforms.utime.value += 0.05;
-                    // jumpBigObjectRef.current[i].material.color = new THREE.Color(0,0,1);
-                    jumpBigObjectRef.current[i].children[0].material.uniforms.utime.value += 0.05;
-                }
-                for(let i =0;i<jumpSwitchObjectRef.current.length;i++)
-                {
-                    // jumpSwitchObjectRef.current[i].children[0].material.uniforms.utime.value += 0.05;
-                }
-            }
+                
+            //}
             
         })
     let searchForCoinToShow = (_index)=>

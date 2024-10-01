@@ -7,7 +7,8 @@ import { GameOverScreen, GuiContainer, LoadingScreen, PauseButton, PauseScreen, 
 export let appContext = createContext(null)
 function App() {
   let devMode = useRef(false);
-  let [gameState,setGameState] = useState('Play');
+  let gamePause = useRef(false);
+  let [gameState,setGameState] = useState('title');
   let loadingScreenRef = useRef(null);
   let pauseScreenRef = useRef(null);
   let gameOverScreenRef = useRef(null);
@@ -30,20 +31,31 @@ function App() {
 
   let togglePauseScreen = ()=>
       {
-        pauseScreenRef.current.style.display = pauseScreenRef.current.style.display == 'block'? 'none' : 'block' ;
+        gamePause.current = !gamePause.current;
+        
+        if(gamePause.current){pauseScreenRef.current.style.display = 'block' ;}
+        else{pauseScreenRef.current.style.display = pauseScreenRef.current.style.display = 'none';}
+        
 
         if(pauseScreenRef.current.style.display == 'block'){pauseAnimationFunc.current();}
         else{resumeAnimationFunc.current();}
         
       }
 
+  let startGame = ()=>
+    {
+      gamePause.current = false;
+      setGameState('Play')
+    }
   let restartGame = ()=>
      {
+        gamePause.current = false;
         setGameState('loading');
         setTimeout(()=>{setGameState('Play')},250);
      }
   let quitGame = ()=>
     {
+      gamePause.current = false;
       setGameState('title');
     }
     
@@ -51,8 +63,8 @@ function App() {
   return (
     <>
         <appContext.Provider
-          value={{upButtonFunc,upButtonFuncEnd,leftButtonFunc,leftButtonFuncEnd,rigthButtonFunc,rigthButtonFuncEnd,
-                  coinValueRef,scoreValueRef,jumpspeedValueRef,jumpx2ValueRef,setGameState,pauseScreenRef,togglePauseScreen,restartGame,
+          value={{upButtonFunc,upButtonFuncEnd,leftButtonFunc,leftButtonFuncEnd,rigthButtonFunc,rigthButtonFuncEnd,gamePause,startGame,
+                  coinValueRef,scoreValueRef,jumpspeedValueRef,jumpx2ValueRef,setGameState,gameState,pauseScreenRef,togglePauseScreen,restartGame,
                   quitGame,pauseAnimationFunc,resumeAnimationFunc,loadingScreenRef,gameOverScreenRef,guiRef,gui_jumpDesc,guiRef2,guiRef3,devMode
           }}
         >
@@ -66,9 +78,10 @@ function App() {
                 `}
             </style>
             <div
-                className={`absolute w-full max-w-[600px] md1:h-[100%] md1:max-h-[700px] h-[500px] bg-black`}
+                className={`absolute overflow-hidden w-full max-w-[600px] md1:h-[100%] md1:max-h-[700px] left-0 right-0 mx-auto h-[500px] bg-black`}
             >
-                {gameState == "Play" && <GamePlay />}
+                {/* {gameState == "Play" && <GamePlay />} */}
+                <GamePlay />
                 {gameState == 'title' && <TitleScreen />}
                 {gameState == 'loading' && <LoadingScreen />}
             </div>
@@ -83,9 +96,11 @@ function GamePlay()
   let _appContext = useContext(appContext);
   return <>
                 <Canvas>
-                    <axesHelper  args={[10]}/>
-                    <GameRender />
+                    
+                    { _appContext.gameState == "Play" && <GameRender />}
                 </Canvas>
+                { _appContext.gameState == "Play" &&
+                <>
                 <div
                     id='CONTROL BUTTON'
                     className={`w-[250px] h-[50px] absolute z-[1] left-[0] right-[0] mx-auto bottom-[10px]
@@ -136,6 +151,8 @@ function GamePlay()
                 <GameValueContainer icon='jumpx2' order={4} _ref={_appContext.jumpx2ValueRef} />
                 <LoadingScreen />
                 <GameOverScreen />
+                </>
+                }
                 {_appContext.devMode.current && <GuiContainer  />}
          </>
 }
@@ -150,8 +167,8 @@ function GameValueContainer(props)
     else if(props.icon == 'jumpx2'){imgLink ="jumpx2.png"}
     if(props.order == 1){classValue = "h-[40px] absolute left-[0] top-[10px] bg-[#222322] pl-[5px] pr-[10px] rounded-r-[25px] flex "}
     else if(props.order == 2){classValue = "h-[40px] absolute left-[0] top-[60px] bg-[#222322] pl-[5px] pr-[10px] rounded-r-[25px] flex "}
-    else if(props.order == 3){classValue = "h-[50px] absolute left-[-5px] top-[110px] bg-[#222322] py-[5px] pl-[5px] pr-[10px] rounded-r-[25px] flex border-[1px] border-yellow-500 "}
-    else if(props.order == 4){classValue = "h-[50px] absolute left-[-5px] top-[170px] bg-[#222322] py-[5px] pl-[5px] pr-[10px] rounded-r-[25px] flex border-[1px] border-yellow-500 "}
+    else if(props.order == 3){classValue = "h-[50px] absolute left-[0] top-[110px] bg-[#222322] py-[5px] pl-[5px] pr-[10px] rounded-r-[25px] flex border-[1px] border-yellow-500 "}
+    else if(props.order == 4){classValue = "h-[50px] absolute left-[0] top-[170px] bg-[#222322] py-[5px] pl-[5px] pr-[10px] rounded-r-[25px] flex border-[1px] border-yellow-500 "}
 
     
     return <div 

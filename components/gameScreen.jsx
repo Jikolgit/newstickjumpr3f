@@ -6,14 +6,14 @@ export function TitleScreen()
     let _appContext = useContext(appContext);
     return  <div
                 style={{backgroundImage:'linear-gradient(180deg, hsl(150deg 100% 20%) 0%, hsl(135deg 59% 26%) 11%, hsl(118deg 45% 29%) 22%, hsl(103deg 52% 28%) 33%, hsl(91deg 59% 27%) 44%, hsl(82deg 66% 26%) 56%, hsl(74deg 75% 25%) 67%, hsl(67deg 85% 24%) 78%, hsl(61deg 94% 23%) 89%, hsl(55deg 100% 25%) 100%)'}}
-                className="w-full h-full bg-blue-500 "
+                className="w-full h-full bg-blue-500 absolute left-0 top-0 z-[3] "
             >
                     <div
                         id={'TITLE'} 
                     className={`w-full max-w-[400px] h-[200px] mx-auto `} >
                         <img className="w-full h-full" src="titlepic.png" alt="title" />
                     </div>
-                    <MenuButton func={()=>{_appContext.setGameState('Play')}} img={'bouton_play_new.png'} />
+                    <MenuButton func={_appContext.startGame} img={'bouton_play_new.png'} />
                     <div
                         className="flex justify-center mt-[35px] "
                     >
@@ -86,8 +86,8 @@ export function LoadingScreen(props)
     let _appContext = useContext(appContext);
     return <div              
                 ref={_appContext.loadingScreenRef}
-                className="text-white text-[2rem] w-full h-full bg-black absolute left-[0] top-[0] z-[10] ">
-                        LOADING...
+                className="text-white text-center flex flex-col justify-center text-[1.5rem] w-full h-full bg-black absolute left-[0] top-[0] z-[10] ">
+                        CHARGEMENT...
                 </div>
 }
 export function GameOverScreen(props)
@@ -96,7 +96,7 @@ export function GameOverScreen(props)
     return <div              
                 ref={_appContext.gameOverScreenRef}
                 className="hidden text-white text-[2rem] w-full h-full bg-black/80 absolute left-[0] top-[0] z-[9] ">
-                        <div>GAME OVER</div>
+                        <div className="text-center">GAME OVER</div>
                         <MenuButton func={()=>{_appContext.restartGame()}} img={'bouton_restart_new.png'} />
                         <MenuButton func={()=>{_appContext.quitGame()}} img={'bouton_quit_new.png'} />
 
